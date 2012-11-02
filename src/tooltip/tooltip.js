@@ -100,8 +100,8 @@
 			 left = conf.relative ? trigger.position().left : trigger.offset().left,
 			 pos = conf.position[0];
 
-		top  -= tip.outerHeight() - conf.offset[0];
-		left += trigger.outerWidth() + conf.offset[1];
+		top  -= tip.outerHeight(false) - conf.offset[0];
+		left += trigger.outerWidth(false) + conf.offset[1];
 		
 		// iPad position fix
 		if (/iPad/i.test(navigator.userAgent)) {
@@ -109,14 +109,14 @@
 		}
 		
 		// adjust Y		
-		var height = tip.outerHeight() + trigger.outerHeight();
+		var height = tip.outerHeight(false) + trigger.outerHeight(false);
 		if (pos == 'center') 	{ top += height / 2; }
 		if (pos == 'bottom') 	{ top += height; }
 		
 		
 		// adjust X
 		pos = conf.position[1]; 	
-		var width = tip.outerWidth() + trigger.outerWidth();
+		var width = tip.outerWidth(false) + trigger.outerWidth(false);
 		if (pos == 'center') 	{ left -= width / 2; }
 		if (pos == 'left')   	{ left -= width; }	 
 		
@@ -203,7 +203,8 @@
 
 					// manual tooltip
 					} else {	
-						tip = trigger.next();  
+						tip = trigger.find('.' + conf.tipClass);
+						if (!tip.length) { tip = trigger.next(); }
 						if (!tip.length) { tip = trigger.parent().next(); } 	 
 					}
 					
@@ -331,10 +332,6 @@
 	
 	// jQuery plugin implementation
 	$.fn.tooltip = function(conf) {
-		
-		// return existing instance
-		var api = this.data("tooltip");
-		if (api) { return api; }
 
 		conf = $.extend(true, {}, $.tools.tooltip.conf, conf);
 		
@@ -344,9 +341,12 @@
 		}
 		
 		// install tooltip for each entry in jQuery object
+		// that is not an existing instance
 		this.each(function() {
-			api = new Tooltip($(this), conf); 
-			$(this).data("tooltip", api); 
+			if ( $(this).data("tooltip")===null){
+			    api = new Tooltip($(this), conf);
+			    $(this).data("tooltip", api);
+			};
 		});
 		
 		return conf.api ? api: this;		 
